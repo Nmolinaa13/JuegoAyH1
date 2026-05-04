@@ -511,6 +511,10 @@ async function submitOpen(id){
   }catch(e){
     $('ald').classList.remove('on');
     $('btn-open').disabled=false;
+    const fb=$('kaai');
+    fb.className='kaai err on';
+    fb.innerHTML=`<div class="kaai-top"><div class="kaai-ico">🦜</div><div class="kaai-name">Kaai — Verificación manual</div></div><div class="kaai-msg">Sistema de evaluación no disponible. Solicita verificación al Profe con el código.</div>`;
+    $('vpend').classList.add('on');
     requestVerify(id);
   }
 }
