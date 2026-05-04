@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Tablero Maestro · Aburrát Cahué · Misión Final</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Playfair+Display:ital,wght@0,700;1,700&display=swap');
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#070906;--bg2:#0D1008;--bg3:#111509;--green:#7CB342;--gdim:#3E5E25;--gdark:#1A2710;--text:#DDD8C4;--tmid:#8A8473;--tdim:#4A4840;--gold:#BFA46A;--orange:#E07B2A;--move:#2ECC71;}
+html,body{height:100vh;background:var(--bg);color:var(--text);font-family:'Space Mono',monospace;overflow:hidden}
+body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.05) 2px,rgba(0,0,0,0.05) 4px);pointer-events:none;z-index:999}
+
+.hdr{height:54px;background:var(--gdark);border-bottom:1px solid var(--gdim);display:flex;align-items:center;justify-content:space-between;padding:0 28px}
+.hdr-t{font-family:'Playfair Display',serif;font-style:italic;font-size:24px;color:var(--text)}
+.hdr-sub{font-size:7px;letter-spacing:.2em;color:var(--gdim);text-transform:uppercase;margin-bottom:2px}
+.stats{display:flex;gap:32px;align-items:center}
+.stat-v{font-size:18px;color:var(--green);font-weight:700;text-align:right}
+.stat-l{font-size:7px;letter-spacing:.14em;color:var(--tdim);text-transform:uppercase;text-align:right}
+.dot{width:10px;height:10px;background:var(--green);border-radius:50%;animation:blink 1.4s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.1}}
+
+.body{height:calc(100vh - 54px - 34px);display:flex;overflow:hidden}
+.board{flex:1;padding:16px 22px;overflow-y:auto;border-right:1px solid var(--gdark)}
+.board::-webkit-scrollbar{width:3px}
+.board::-webkit-scrollbar-thumb{background:var(--gdark)}
+.slbl{font-size:7px;letter-spacing:.2em;color:var(--gdim);text-transform:uppercase;margin-bottom:12px}
+
+.trow{display:grid;grid-template-columns:36px 1fr 80px;gap:14px;align-items:center;padding:10px 14px;border:1px solid var(--tdim);background:var(--bg2);margin-bottom:6px;transition:border-color .4s,background .4s}
+.trow.r1{border-color:var(--gold);background:#120F04}
+.trow.r2{border-color:#9A9A9A;background:#0E0F10}
+.trow.r3{border-color:#8B6914;background:#100D08}
+.trow.bump{animation:bump .5s ease}
+@keyframes bump{0%{transform:scale(1)}40%{transform:scale(1.018);border-color:var(--green)}100%{transform:scale(1)}}
+.rnum{font-size:15px;font-weight:700;color:var(--tdim);text-align:center}
+.trow.r1 .rnum{color:var(--gold)}.trow.r2 .rnum{color:#C0C0C0}.trow.r3 .rnum{color:#CD7F32}
+.tname{font-size:13px;color:var(--text);font-weight:700;letter-spacing:.04em;margin-bottom:4px}
+.tpb{background:var(--bg);height:4px;border:1px solid var(--tdim);overflow:hidden}
+.tpbf{height:100%;background:var(--green);transition:width .7s ease}
+.tdone{font-size:7px;letter-spacing:.1em;color:var(--tdim);margin-top:3px}
+.tscore{font-size:22px;color:var(--gold);font-weight:700;text-align:right}
+.tlvl{font-size:7px;letter-spacing:.08em;color:var(--tdim);text-transform:uppercase;text-align:right}
+
+.right{width:290px;padding:16px;display:flex;flex-direction:column;gap:0;overflow:hidden}
+.ftit{font-size:7px;letter-spacing:.2em;color:var(--gdim);text-transform:uppercase;margin-bottom:10px}
+.feed{flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:5px}
+.feed::-webkit-scrollbar{width:2px}
+.fi{background:var(--bg2);border-left:2px solid var(--gdim);padding:7px 10px;font-size:9px;color:var(--tmid);line-height:1.5;animation:fdin .4s ease}
+.fi.hl{border-left-color:var(--gold)}
+.fi-t{color:var(--green);font-weight:700;margin-bottom:1px}
+.fi.hl .fi-t{color:var(--gold)}
+.fi-s{color:var(--tdim);font-size:8px}
+
+.ypanel{background:var(--gdark);border:1px solid var(--gdim);padding:12px;margin-top:12px}
+.ylbl{font-size:7px;letter-spacing:.16em;color:var(--green);text-transform:uppercase;font-weight:700;margin-bottom:7px}
+.ymsg{font-size:10px;color:var(--tmid);font-style:italic;line-height:1.75;transition:opacity .4s}
+
+.bbar{height:34px;background:var(--gdark);border-top:1px solid var(--gdim);display:flex;align-items:center;justify-content:space-between;padding:0 24px}
+.bb-l{font-size:7px;letter-spacing:.16em;color:var(--gdim);text-transform:uppercase}
+.bb-r{font-size:8px;color:var(--tdim);letter-spacing:.1em}
+
+.empty{text-align:center;padding:60px 20px;color:var(--tdim)}
+.empty p{font-size:10px;line-height:1.9;font-style:italic}
+
+/* TOAST */
+.toast{position:fixed;bottom:50px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--gdark);border:2px solid var(--green);padding:14px 32px;text-align:center;z-index:990;opacity:0;transition:all .35s;pointer-events:none}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.t-team{font-size:10px;letter-spacing:.14em;color:var(--green);text-transform:uppercase;margin-bottom:3px}
+.t-title{font-family:'Playfair Display',serif;font-style:italic;font-size:18px;color:var(--text)}
+.t-pts{font-size:26px;color:var(--gold);font-weight:700}
+
+/* CONFETTI */
+.conf{display:none;position:fixed;inset:0;pointer-events:none;z-index:980}
+.conf.on{display:block}
+.cp{position:absolute;border-radius:50%;animation:expl 1.5s ease-out forwards}
+@keyframes expl{0%{opacity:1;transform:translate(0,0) scale(1)}100%{opacity:0;transform:translate(var(--tx),var(--ty)) scale(0)}}
+@keyframes fdin{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+</style>
+</head>
+<body>
+
+<div class="hdr">
+  <div>
+    <div class="hdr-sub">Aburrát Cahué · Año 3177 · Sistema de Exploración Cultural · EAFIT</div>
+    <div class="hdr-t">Tablero de Misiones · Transmisión Final</div>
+  </div>
+  <div class="stats">
+    <div><div class="stat-v" id="s-equipos">0</div><div class="stat-l">Equipos activos</div></div>
+    <div><div class="stat-v" id="s-retos">0</div><div class="stat-l">Retos completados</div></div>
+    <div><div class="stat-v" id="s-lider">—</div><div class="stat-l">Líder actual</div></div>
+    <div class="dot"></div>
+  </div>
+</div>
+
+<div class="body">
+  <div class="board">
+    <div class="slbl">Ranking de cuadrillas · actualización en tiempo real</div>
+    <div id="tlist"><div class="empty"><p>🦜 Esperando que los equipos<br>activen su transmisión…<br><br><span style="font-size:8px;letter-spacing:.15em;text-transform:uppercase">Aburrát Cahué · Año 3177</span></p></div></div>
+  </div>
+  <div class="right">
+    <div class="ftit">Actividad reciente</div>
+    <div class="feed" id="feed"><div style="font-size:9px;color:var(--tdim);font-style:italic;padding:6px">Esperando actividad…</div></div>
+    <div class="ypanel">
+      <div class="ylbl">🗡 Yaruma dice</div>
+      <div class="ymsg" id="ymsg">Los exploradores están activando sus dispositivos. La misión está por comenzar.</div>
+    </div>
+  </div>
+</div>
+
+<div class="bbar">
+  <div class="bb-l"><span id="clock">—</span> · Misión en progreso</div>
+  <div class="bb-r">Aburrát Cahué · EAFIT · Artes y Humanidades I · 2026-1</div>
+</div>
+
+<div class="toast" id="toast">
+  <div class="t-team" id="t-team">—</div>
+  <div class="t-title" id="t-title">Reto superado</div>
+  <div class="t-pts" id="t-pts">+0 pts</div>
+</div>
+<div class="conf" id="conf"></div>
+
+<script>
+const YARUMA = [
+  'Los exploradores están interpretando la cultura… no solo registrándola.',
+  'Cada reto superado es un paso más hacia la comprensión.',
+  'La cultura no se observa desde afuera. Se lee desde adentro.',
+  'Algunos ya ven lo que antes era invisible. Ese es el objetivo.',
+  '¿Pueden ver cómo el contexto transforma el significado?',
+  'El poder opera incluso cuando no se muestra. Los exploradores lo están descubriendo.',
+  'La serialización cultural está en todas partes. Solo hay que saber mirar.',
+  'Bon voyajo, esploradores. La ruto kontinua.',
+];
+
+const lvlLabel = n => n===0?'Sin inicio':n<=5?'Explorador':n<=10?'Observador':n<=15?'Analista':n<=20?'Intérprete':n<25?'Maestro cultural':'★ Intérprete supremo';
+
+let prev = {};
+let feed = [];
+let yIdx = 0;
+let toastQ = []; let toastBusy = false;
+
+// Clock
+setInterval(()=>{
+  const d=new Date();
+  document.getElementById('clock').textContent=[d.getHours(),d.getMinutes(),d.getSeconds()].map(x=>String(x).padStart(2,'0')).join(':');
+},1000);
+
+// Yaruma rotation
+setInterval(()=>{
+  yIdx=(yIdx+1)%YARUMA.length;
+  const el=document.getElementById('ymsg');
+  el.style.opacity='0';
+  setTimeout(()=>{el.textContent=YARUMA[yIdx];el.style.opacity='1';},400);
+},14000);
+
+// Fetch & render
+async function fetchAndRender(){
+  try{
+    const r=await fetch('/api/scores');
+    const teams=await r.json();
+    if(!Array.isArray(teams)||!teams.length){
+      document.getElementById('tlist').innerHTML='<div class="empty"><p>🦜 Esperando que los equipos<br>activen su transmisión…</p></div>';
+      return;
+    }
+    teams.sort((a,b)=>b.score-a.score);
+    document.getElementById('s-equipos').textContent=teams.length;
+    document.getElementById('s-retos').textContent=teams.reduce((s,t)=>s+(t.completed||0),0);
+    document.getElementById('s-lider').textContent=teams[0].team_name.split(' ')[0];
+
+    teams.forEach(t=>{
+      const p=prev[t.team_name];
+      if(p&&t.score>p.score){
+        const diff=t.score-p.score;
+        addFeed(t.team_name,`completó un reto (+${diff} pts)`,diff>=20);
+        queueToast(t.team_name,diff);
+        celebrate();
+        rotateYaruma();
+      } else if(!p){
+        addFeed(t.team_name,'activó su transmisión',false);
+      }
+    });
+    prev=Object.fromEntries(teams.map(t=>[t.team_name,{...t}]));
+
+    document.getElementById('tlist').innerHTML=teams.map((t,i)=>{
+      const r=i+1;
+      const rc=r<=3?`r${r}`:'';
+      const ico=r===1?'🥇':r===2?'🥈':r===3?'🥉':r;
+      const pct=Math.round((t.completed||0)/25*100);
+      return `<div class="trow ${rc}" id="tr-${t.team_name.replace(/\W/g,'_')}">
+        <div class="rnum">${ico}</div>
+        <div><div class="tname">${t.team_name}</div>
+        <div class="tpb"><div class="tpbf" style="width:${pct}%"></div></div>
+        <div class="tdone">${t.completed||0}/25 retos · ${lvlLabel(t.completed||0)}</div></div>
+        <div><div class="tscore">${t.score}</div><div class="tlvl">pts</div></div>
+      </div>`;
+    }).join('');
+  }catch(e){}
+}
+
+function addFeed(team,msg,hl){
+  const d=new Date();
+  const t=`${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+  feed.unshift({team,msg,t,hl});
+  if(feed.length>12)feed.pop();
+  document.getElementById('feed').innerHTML=feed.map(f=>`<div class="fi ${f.hl?'hl':''}"><div class="fi-t">${f.team}</div><div class="fi-s">${f.t} · ${f.msg}</div></div>`).join('');
+}
+
+function rotateYaruma(){
+  yIdx=(yIdx+1)%YARUMA.length;
+  const el=document.getElementById('ymsg');
+  el.style.opacity='0';
+  setTimeout(()=>{el.textContent=YARUMA[yIdx];el.style.opacity='1';},400);
+}
+
+function queueToast(team,pts){ toastQ.push({team,pts}); if(!toastBusy)runToast(); }
+function runToast(){
+  if(!toastQ.length){toastBusy=false;return;}
+  toastBusy=true;
+  const {team,pts}=toastQ.shift();
+  const el=document.getElementById('toast');
+  document.getElementById('t-team').textContent=team;
+  document.getElementById('t-title').textContent='Reto superado';
+  document.getElementById('t-pts').textContent='+'+pts+' pts';
+  el.classList.add('show');
+  setTimeout(()=>{el.classList.remove('show');setTimeout(runToast,400);},3000);
+}
+
+function celebrate(){
+  const c=document.getElementById('conf'); c.innerHTML=''; c.classList.add('on');
+  const cols=['#7CB342','#BFA46A','#E07B2A','#2ECC71','#DDD8C4','#5B8ACC'];
+  for(let i=0;i<45;i++){
+    const p=document.createElement('div'); p.className='cp';
+    const s=6+Math.random()*8;
+    p.style.cssText=`left:${Math.random()*100}%;top:50%;width:${s}px;height:${s}px;background:${cols[~~(Math.random()*6)]};--tx:${(Math.random()-.5)*window.innerWidth}px;--ty:${(Math.random()-1)*window.innerHeight}px;animation-delay:${Math.random()*.5}s`;
+    c.appendChild(p);
+  }
+  setTimeout(()=>{c.classList.remove('on');c.innerHTML=''},2000);
+}
+
+// Init
+fetchAndRender();
+setInterval(fetchAndRender,2500);
+</script>
+</body>
+</html>

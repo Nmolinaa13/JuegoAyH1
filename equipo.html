@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Misión Final · Aburrát Cahué 3177</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Playfair+Display:ital,wght@0,700;1,700&display=swap');
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0B0E07;--bg2:#111509;--bg3:#0D1008;
+  --green:#7CB342;--gdim:#3E5E25;--gdark:#1A2710;
+  --text:#DDD8C4;--tmid:#8A8473;--tdim:#4A4840;
+  --gold:#BFA46A;--orange:#E07B2A;--red:#C0392B;
+  --move:#2ECC71;
+}
+html,body{min-height:100vh;background:var(--bg);color:var(--text);font-family:'Space Mono',monospace;overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.04) 2px,rgba(0,0,0,0.04) 4px);pointer-events:none;z-index:999}
+
+/* HDR */
+.hdr{background:var(--gdark);border-bottom:1px solid var(--gdim);padding:8px 16px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+.hdr-l{font-size:8px;letter-spacing:.15em;color:var(--gdim);text-transform:uppercase;display:flex;align-items:center;gap:8px}
+.dot{width:7px;height:7px;background:var(--green);border-radius:50%;animation:blink 1.4s infinite;flex-shrink:0}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.1}}
+.hdr-r{font-size:11px;color:var(--green);font-weight:700;letter-spacing:.08em}
+
+/* SCREENS */
+.scr{display:none;min-height:calc(100vh - 40px);padding:24px 16px 80px}
+.scr.on{display:block}
+
+/* REGISTER */
+.reg{max-width:480px;margin:40px auto 0;text-align:center}
+.logo{font-family:'Playfair Display',serif;font-style:italic;font-size:36px;color:var(--text);line-height:1.1;margin-bottom:4px}
+.logo-s{font-size:9px;letter-spacing:.22em;color:var(--gdim);text-transform:uppercase;margin-bottom:36px}
+.intro{border:1px solid var(--gdim);background:var(--gdark);padding:18px;margin-bottom:28px;text-align:left}
+.intro p{font-size:12px;line-height:1.85;color:var(--tmid);font-style:italic}
+.intro p span{color:var(--green);font-style:normal;font-weight:700}
+.flbl{font-size:8px;letter-spacing:.18em;color:var(--gdim);text-transform:uppercase;margin-bottom:6px;text-align:left}
+.finp{width:100%;background:var(--bg3);border:1px solid var(--gdim);color:var(--text);font-family:'Space Mono',monospace;font-size:13px;padding:11px 14px;outline:none;margin-bottom:4px}
+.finp:focus{border-color:var(--green)}
+.finp::placeholder{color:var(--tdim)}
+.btn-p{width:100%;background:var(--gdark);border:1px solid var(--green);color:var(--green);font-family:'Space Mono',monospace;font-size:10px;letter-spacing:.14em;text-transform:uppercase;padding:13px;cursor:pointer;margin-top:14px;transition:all .2s}
+.btn-p:hover:not(:disabled){background:var(--green);color:var(--bg)}
+.btn-p:disabled{opacity:.4;cursor:not-allowed}
+
+/* MAP */
+.map-w{max-width:600px;margin:0 auto}
+.map-hdr{text-align:center;margin-bottom:24px}
+.map-hdr h2{font-family:'Playfair Display',serif;font-style:italic;font-size:26px;color:var(--text);margin-bottom:4px}
+.map-hdr p{font-size:8px;letter-spacing:.18em;color:var(--gdim);text-transform:uppercase}
+.score-bar{display:flex;align-items:center;justify-content:space-between;background:var(--gdark);border:1px solid var(--gdim);padding:11px 14px;margin-bottom:20px}
+.sb-name{font-size:11px;color:var(--green);font-weight:700;letter-spacing:.08em}
+.sb-pts{font-size:20px;color:var(--gold);font-weight:700}
+.sb-lbl{font-size:7px;letter-spacing:.14em;color:var(--tdim);text-transform:uppercase}
+.pb-w{margin-bottom:18px}
+.pb-lbl{display:flex;justify-content:space-between;font-size:7px;letter-spacing:.14em;color:var(--tdim);text-transform:uppercase;margin-bottom:5px}
+.pb-tr{background:var(--bg3);border:1px solid var(--tdim);height:5px}
+.pb-fl{background:var(--green);height:100%;transition:width .5s}
+.lvl-grid{display:grid;gap:7px}
+.lvi{border:1px solid var(--tdim);background:var(--bg3);padding:13px 14px;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:12px}
+.lvi.open{border-color:var(--gdim)}
+.lvi.open:hover{border-color:var(--green);background:var(--gdark)}
+.lvi.done{border-color:var(--green);background:var(--gdark);opacity:.65;cursor:default}
+.lvi.lock{opacity:.3;cursor:not-allowed}
+.lvi-num{font-size:10px;font-weight:700;letter-spacing:.12em;color:var(--tdim);min-width:28px;text-align:center}
+.lvi.open .lvi-num,.lvi.done .lvi-num{color:var(--green)}
+.lvi-info{flex:1}
+.badge{display:inline-block;font-size:7px;letter-spacing:.14em;text-transform:uppercase;padding:2px 7px;border:1px solid;margin-bottom:3px}
+.bk{border-color:#5B8ACC;color:#5B8ACC}
+.ba{border-color:var(--orange);color:var(--orange)}
+.bm{border-color:var(--move);color:var(--move)}
+.lvi-title{font-size:11px;color:var(--tmid)}
+.lvi.open .lvi-title{color:var(--text)}
+.lvi-pts{font-size:8px;color:var(--gold);letter-spacing:.08em;font-weight:700;min-width:44px;text-align:right}
+.lvi-ico{font-size:14px}
+
+/* CHALLENGE */
+.ch-w{max-width:560px;margin:0 auto}
+.back{font-size:8px;letter-spacing:.16em;color:var(--gdim);text-transform:uppercase;cursor:pointer;margin-bottom:14px;display:flex;align-items:center;gap:5px}
+.back:hover{color:var(--green)}
+.ch-num{font-size:8px;letter-spacing:.18em;text-transform:uppercase;margin-bottom:5px}
+.ch-q{font-family:'Playfair Display',serif;font-style:italic;font-size:19px;color:var(--text);line-height:1.45;margin-bottom:20px}
+.ch-hint{background:var(--gdark);border-left:3px solid var(--green);padding:9px 12px;margin-bottom:20px;font-size:10px;color:var(--tmid);letter-spacing:.04em;line-height:1.6}
+
+/* OPTIONS */
+.opts{display:grid;gap:7px;margin-bottom:20px}
+.opt{background:var(--bg3);border:1px solid var(--tdim);color:var(--tmid);font-family:'Space Mono',monospace;font-size:11px;padding:12px 14px;cursor:pointer;text-align:left;transition:all .2s;display:flex;gap:10px}
+.opt:hover:not(:disabled){border-color:var(--gdim);color:var(--text);background:var(--gdark)}
+.opt.sel{border-color:var(--green);background:var(--gdark);color:var(--text)}
+.opt.cor{border-color:var(--move);background:#0A1F0E;color:var(--move)}
+.opt.wrg{border-color:var(--red);background:#1F0A0A;color:var(--red)}
+.opt:disabled{cursor:not-allowed}
+.opt-k{font-weight:700;color:var(--gdim);min-width:16px}
+.opt.cor .opt-k{color:var(--move)}
+.opt.wrg .opt-k{color:var(--red)}
+
+/* TEXTAREA */
+.ta{width:100%;background:var(--bg3);border:1px solid var(--gdim);color:var(--text);font-family:'Space Mono',monospace;font-size:11px;padding:12px;min-height:110px;outline:none;resize:vertical;line-height:1.7;margin-bottom:14px}
+.ta:focus{border-color:var(--green)}
+.ta.mv{border-color:var(--move);min-height:90px}
+
+/* UPLOAD */
+.upz{border:1px dashed var(--gdim);background:var(--bg3);padding:24px;text-align:center;cursor:pointer;margin-bottom:12px;transition:all .2s}
+.upz:hover{border-color:var(--green);background:var(--gdark)}
+.upz input{display:none}
+.upz-icon{font-size:24px;margin-bottom:6px;color:var(--gdim)}
+.upz-lbl{font-size:10px;color:var(--tmid);line-height:1.6}
+.img-prev{max-width:100%;max-height:160px;border:1px solid var(--gdim);margin-bottom:10px;display:block}
+.cap{width:100%;background:var(--bg3);border:1px solid var(--gdim);color:var(--text);font-family:'Space Mono',monospace;font-size:11px;padding:10px 12px;outline:none;margin-bottom:10px}
+.cap:focus{border-color:var(--green)}
+
+/* MOVE BOX */
+.mvbox{border:1px solid var(--move);background:#050E07;padding:16px;margin-bottom:16px}
+.mvbox-lbl{font-size:7px;letter-spacing:.18em;color:var(--move);text-transform:uppercase;margin-bottom:8px}
+.mvbox-task{font-size:12px;color:var(--text);line-height:1.7;font-style:italic}
+
+/* SUBMIT BUTTONS */
+.btn-s{width:100%;background:var(--gdark);border:1px solid var(--green);color:var(--green);font-family:'Space Mono',monospace;font-size:10px;letter-spacing:.14em;text-transform:uppercase;padding:12px;cursor:pointer;transition:all .2s;margin-bottom:8px}
+.btn-s:hover:not(:disabled){background:var(--green);color:var(--bg)}
+.btn-s:disabled{opacity:.4;cursor:not-allowed}
+.btn-v{width:100%;background:#050E07;border:2px solid var(--move);color:var(--move);font-family:'Space Mono',monospace;font-size:10px;letter-spacing:.14em;text-transform:uppercase;padding:12px;cursor:pointer;transition:all .2s;animation:pglow 2s infinite}
+@keyframes pglow{0%,100%{box-shadow:0 0 0 0 rgba(46,204,113,.3)}50%{box-shadow:0 0 0 6px rgba(46,204,113,0)}}
+
+/* KAAI FEEDBACK */
+.kaai{border:1px solid var(--green);background:var(--gdark);padding:16px;margin-top:16px;display:none;animation:fdin .45s ease}
+.kaai.on{display:block}
+.kaai.err{border-color:var(--red);background:#1A0808}
+.kaai-top{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+.kaai-ico{font-size:20px}
+.kaai-name{font-size:8px;letter-spacing:.18em;color:var(--green);text-transform:uppercase;font-weight:700}
+.kaai.err .kaai-name{color:var(--red)}
+.kaai-msg{font-size:11px;color:var(--text);line-height:1.8;font-style:italic}
+.kaai-pts{font-size:20px;color:var(--gold);font-weight:700;margin-top:8px}
+
+/* AI LOADING */
+.ald{text-align:center;padding:18px;display:none}
+.ald.on{display:block}
+.ald-t{font-size:8px;letter-spacing:.18em;color:var(--gdim);text-transform:uppercase;animation:blink 1s infinite}
+
+/* VERIFY PENDING */
+.vpend{border:2px solid var(--move);background:#050E07;padding:16px;margin-top:14px;text-align:center;display:none}
+.vpend.on{display:block;animation:fdin .4s ease}
+.vpend h3{font-size:10px;letter-spacing:.14em;color:var(--move);text-transform:uppercase;margin-bottom:8px}
+.vcode{font-size:32px;font-weight:700;color:var(--move);letter-spacing:.35em;margin:10px 0}
+.vpend p{font-size:10px;color:var(--tmid);line-height:1.6}
+
+/* PROFE MODAL */
+.pmodal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:500;padding:16px}
+.pmodal.on{display:flex;align-items:center;justify-content:center}
+.pm-inner{background:var(--bg2);border:2px solid var(--green);max-width:420px;width:100%;padding:24px;max-height:80vh;overflow-y:auto}
+.pm-inner h3{font-size:10px;letter-spacing:.18em;color:var(--green);text-transform:uppercase;margin-bottom:16px}
+.code-in{width:100%;background:var(--bg3);border:1px solid var(--gdim);color:var(--text);font-family:'Space Mono',monospace;font-size:22px;padding:11px 14px;outline:none;letter-spacing:.22em;text-align:center;margin-bottom:10px;text-transform:uppercase}
+.code-in:focus{border-color:var(--green)}
+.btn-apr{width:100%;background:var(--gdark);border:1px solid var(--move);color:var(--move);font-family:'Space Mono',monospace;font-size:10px;letter-spacing:.14em;text-transform:uppercase;padding:11px;cursor:pointer;margin-bottom:7px;transition:all .2s}
+.btn-apr:hover{background:var(--move);color:var(--bg)}
+.btn-rej{width:100%;background:var(--bg3);border:1px solid var(--red);color:var(--red);font-family:'Space Mono',monospace;font-size:10px;letter-spacing:.14em;text-transform:uppercase;padding:11px;cursor:pointer;margin-bottom:14px;transition:all .2s}
+.btn-rej:hover{background:var(--red);color:#fff}
+.btn-cls{width:100%;background:transparent;border:1px solid var(--tdim);color:var(--tdim);font-family:'Space Mono',monospace;font-size:9px;letter-spacing:.1em;text-transform:uppercase;padding:9px;cursor:pointer}
+.pm-res{padding:10px;text-align:center;font-size:10px;margin-bottom:10px;display:none}
+.pm-res.on{display:block}
+
+/* COMPLETION */
+.comp{text-align:center;max-width:480px;margin:50px auto 0}
+.comp h2{font-family:'Playfair Display',serif;font-style:italic;font-size:32px;color:var(--text);margin-bottom:14px;line-height:1.2}
+.comp-quote{border:1px solid var(--gold);background:var(--gdark);padding:20px;margin:20px 0;font-style:italic;font-size:13px;color:var(--text);line-height:1.85}
+.comp-pts{font-size:52px;color:var(--gold);font-weight:700;margin:16px 0}
+.comp-lbl{font-size:8px;letter-spacing:.18em;color:var(--tdim);text-transform:uppercase}
+
+/* LEVEL BANNER */
+.lvbanner{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:var(--gdark);border:2px solid var(--green);padding:20px 36px;text-align:center;z-index:900;display:none;animation:fdin .4s ease}
+.lvbanner.on{display:block}
+.lvb-t{font-family:'Playfair Display',serif;font-style:italic;font-size:24px;color:var(--text);margin-bottom:4px}
+.lvb-s{font-size:8px;letter-spacing:.18em;color:var(--green);text-transform:uppercase}
+.lvb-p{font-size:32px;color:var(--gold);font-weight:700}
+
+/* CONFETTI */
+.conf{display:none;position:fixed;inset:0;pointer-events:none;z-index:800}
+.conf.on{display:block}
+.cp{position:absolute;width:6px;height:6px;border-radius:50%;animation:expl 1.2s ease-out forwards}
+@keyframes expl{0%{transform:translate(0,0) scale(1);opacity:1}100%{transform:translate(var(--tx),var(--ty)) scale(0);opacity:0}}
+@keyframes fdin{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+
+/* PROFE TRIGGER */
+.ptrig{position:fixed;bottom:10px;right:10px;background:var(--bg3);border:1px solid var(--tdim);color:var(--tdim);font-family:'Space Mono',monospace;font-size:7px;letter-spacing:.1em;padding:5px 9px;cursor:pointer;z-index:200;text-transform:uppercase}
+.ptrig:hover{border-color:var(--green);color:var(--green)}
+</style>
+</head>
+<body>
+
+<div class="hdr">
+  <div class="hdr-l"><span class="dot"></span>Aburrát Cahué · Año 3177 · Misión Final</div>
+  <div class="hdr-r" id="hdr-team"></div>
+</div>
+
+<!-- REGISTER -->
+<div class="scr on" id="scr-reg">
+  <div class="reg">
+    <div class="logo">Misión Final</div>
+    <div class="logo-s">Aburrát Cahué · Sistema de Exploración Cultural · Año 3177</div>
+    <div class="intro">
+      <p><span>Yaruma:</span><br><br>
+      Exploradores…<br>ya no basta con reconocer la cultura.<br><br>
+      Ahora deberán interpretarla.<br><br>
+      Algunas respuestas parecerán correctas…<br>pero solo una revela comprensión.</p>
+    </div>
+    <div class="flbl">Nombre de la cuadrilla</div>
+    <input class="finp" id="inp-team" type="text" placeholder="Ej: Kuadrela Roja…" maxlength="40">
+    <div class="flbl" style="margin-top:12px">Integrantes</div>
+    <input class="finp" id="inp-members" type="text" placeholder="Ana, Carlos, María…">
+    <button class="btn-p" onclick="startGame()">⟶ ACTIVAR TRANSMISIÓN</button>
+  </div>
+</div>
+
+<!-- MAP -->
+<div class="scr" id="scr-map">
+  <div class="map-w">
+    <div class="map-hdr">
+      <h2>Rutas de exploración</h2>
+      <p>Completa cada reto para desbloquear el siguiente</p>
+    </div>
+    <div class="score-bar">
+      <div><div class="sb-name" id="map-name">—</div><div class="sb-lbl">Cuadrilla</div></div>
+      <div style="text-align:right"><div class="sb-pts" id="map-score">0</div><div class="sb-lbl">puntos</div></div>
+    </div>
+    <div class="pb-w">
+      <div class="pb-lbl"><span>Progreso</span><span id="pb-txt">0 / 25</span></div>
+      <div class="pb-tr"><div class="pb-fl" id="pb-fl" style="width:0%"></div></div>
+    </div>
+    <div class="lvl-grid" id="lvl-grid"></div>
+  </div>
+</div>
+
+<!-- CHALLENGE -->
+<div class="scr" id="scr-ch">
+  <div class="ch-w">
+    <div class="back" onclick="goMap()">← VOLVER AL MAPA</div>
+    <div id="ch-body"></div>
+  </div>
+</div>
+
+<!-- COMPLETION -->
+<div class="scr" id="scr-done">
+  <div class="comp">
+    <div style="font-size:8px;letter-spacing:.18em;color:var(--green);text-transform:uppercase;margin-bottom:14px">◆ TRANSMISIÓN COMPLETADA ◆</div>
+    <h2>Misión cumplida,<br>intérpretes</h2>
+    <div class="comp-quote">
+      <span style="color:var(--green);font-style:normal;font-weight:700;font-size:8px;letter-spacing:.14em;text-transform:uppercase">Yaruma:</span><br><br>
+      Si pueden ver esto…<br>entonces ya no son exploradores.<br><br>
+      <strong>Son intérpretes de la cultura.</strong>
+    </div>
+    <div class="comp-pts" id="comp-pts">0</div>
+    <div class="comp-lbl">puntos totales · <span id="comp-team">—</span></div>
+    <div style="margin-top:28px;font-size:8px;letter-spacing:.18em;color:var(--tdim);text-transform:uppercase">La mirado kontinua. La ruto es suya.</div>
+  </div>
+</div>
+
+<button class="ptrig" onclick="showProfe()">⚙ PROFE</button>
+
+<!-- PROFE MODAL -->
+<div class="pmodal" id="pmodal">
+  <div class="pm-inner">
+    <h3>🔐 Panel del Profe · Verificación</h3>
+    <p style="font-size:9px;color:var(--tmid);margin-bottom:14px;line-height:1.6">Ingresa el código que muestra la cuadrilla para aprobar o rechazar.</p>
+    <input class="code-in" id="profe-code" type="text" placeholder="XXXX" maxlength="6">
+    <div class="pm-res" id="pm-res"></div>
+    <button class="btn-apr" onclick="profeAct('approve')">✓ APROBAR RETO</button>
+    <button class="btn-rej" onclick="profeAct('reject')">✗ RECHAZAR — REINTENTAR</button>
+    <button class="btn-cls" onclick="hideProfe()">CERRAR</button>
+  </div>
+</div>
+
+<!-- LEVEL BANNER -->
+<div class="lvbanner" id="lvbanner">
+  <div class="lvb-s">Nivel superado</div>
+  <div class="lvb-t" id="lvb-t">—</div>
+  <div class="lvb-p" id="lvb-p">+10</div>
+</div>
+<div class="conf" id="conf"></div>
+
+<script>
+// ─── CONFIG ───────────────────────────────────────
+const BASE = '';  // same origin on Vercel
+
+// ─── RETOS ────────────────────────────────────────
+const RETOS = [
+  {id:1,type:'k',sub:'mc',pts:10,title:'El objeto en el museo',
+   q:'Un objeto cotidiano (como una pelota vieja) es expuesto en un museo. ¿Qué cambia principalmente?',
+   opts:['El objeto','Su materialidad','El contexto y la mirada','Su valor económico'],ans:2,
+   kaai:'Correcto. Esto es desplazamiento: el objeto no cambia… cambia el contexto, y con él, el significado.'},
+  {id:2,type:'k',sub:'mc',pts:10,title:'El meme viral',
+   q:'Un meme se vuelve viral porque muchas personas lo reinterpretan. Esto refleja:',
+   opts:['Repetición','Serialización cultural','Copia sin sentido','Consumo pasivo'],ans:1,
+   kaai:'Exacto. La cultura digital funciona por serialización y variación: repetir transformando.'},
+  {id:3,type:'k',sub:'mc',pts:10,title:'De ruido a cultura',
+   q:'Cuando algo popular deja de ser "ruido" y pasa a ser reconocido como cultura, ocurre:',
+   opts:['Eliminación simbólica','Resignificación','Neutralización','Institucionalización automática'],ans:1,
+   kaai:'Bien. La cultura no nace siendo "alta"… se vuelve reconocida.'},
+  {id:4,type:'k',sub:'mc',pts:10,title:'El algoritmo filtrado',
+   q:'El hecho de que el algoritmo te muestre contenido "acorde a ti" implica:',
+   opts:['Libertad total','Neutralidad tecnológica','Encierro interpretativo','Aleatoriedad'],ans:2,
+   kaai:'Correcto. No eliges todo… eliges dentro de un marco ya filtrado.'},
+  {id:5,type:'k',sub:'mc',pts:10,title:'Lenguaje del meme',
+   q:'¿Por qué un meme puede ser considerado una forma de lenguaje?',
+   opts:['Porque es visual','Porque comunica emociones','Porque tiene reglas compartidas de interpretación','Porque es viral'],ans:2,
+   kaai:'Exacto. El meme es lenguaje porque tiene códigos culturales compartidos.'},
+  {id:6,type:'k',sub:'mc',pts:10,title:'Valor en red',
+   q:'En la sociedad en red, el valor aumenta cuando:',
+   opts:['hay más control','hay menos usuarios','hay mayor participación','hay jerarquía central'],ans:2,
+   kaai:'Bien. La red vale más cuando más nodos participan.'},
+  {id:7,type:'k',sub:'mc',pts:10,title:'Panóptico digital',
+   q:'Un estudiante deja de publicar en redes por miedo a ser juzgado. Esto es:',
+   opts:['libertad digital','consumo cultural','panóptico interiorizado','censura institucional'],ans:2,
+   kaai:'Correcto. El control ya no es externo… es interno.'},
+  {id:8,type:'k',sub:'mc',pts:10,title:'El símbolo universitario',
+   q:'Un símbolo universitario genera sentido de pertenencia porque:',
+   opts:['es visible','tiene diseño','tiene significado compartido','es obligatorio'],ans:2,
+   kaai:'Exacto. El símbolo no significa por sí mismo… significa porque todos acuerdan su valor.'},
+  {id:9,type:'k',sub:'mc',pts:10,title:'De medios a conversaciones',
+   q:'En cultura digital, pasar de "medios" a "conversaciones" implica:',
+   opts:['menos información','más control institucional','participación activa del usuario','pérdida de contenido'],ans:2,
+   kaai:'Correcto. Ya no solo recibes… también produces.'},
+  {id:10,type:'k',sub:'mc',pts:10,title:'Arte y cotidianidad',
+   q:'¿Qué hace que un objeto cotidiano se convierta en arte?',
+   opts:['su valor económico','su complejidad','la mirada y el contexto','su antigüedad'],ans:2,
+   kaai:'Bien. El arte no está en el objeto… está en cómo lo miramos.'},
+  {id:11,type:'k',sub:'open',pts:15,title:'Meme y tensión cultural',
+   q:'Explica cómo un meme puede revelar una tensión cultural.',
+   kaai:'🦜 Correcto si identificas conflicto, ironía o crítica social en el meme.',
+   criteria:'conflicto, ironía o crítica social visible en el meme'},
+  {id:12,type:'k',sub:'open',pts:15,title:'El algoritmo produce cultura',
+   q:'Explica cómo el algoritmo no solo refleja, sino produce cultura.',
+   kaai:'🦜 Bien si mencionas selección, repetición y moldeamiento de preferencias.',
+   criteria:'selección, repetición y moldeamiento de preferencias por el algoritmo'},
+  {id:13,type:'k',sub:'open',pts:15,title:'El lenguaje transforma',
+   q:'Explica una situación donde el lenguaje cambie la realidad.',
+   kaai:'🦜 Correcto si muestras cómo nombrar algo transforma su significado.',
+   criteria:'ejemplo concreto de cómo nombrar algo transforma su significado o realidad'},
+  {id:14,type:'k',sub:'open',pts:15,title:'Poder invisible',
+   q:'Explica cómo una práctica cotidiana puede ocultar relaciones de poder.',
+   kaai:'🦜 Bien si identificas normas invisibles o jerarquías naturalizadas.',
+   criteria:'normas invisibles o jerarquías naturalizadas en una práctica cotidiana'},
+  {id:15,type:'k',sub:'open',pts:15,title:'Consumir vs leer cultura',
+   q:'Explica la diferencia entre consumir cultura y leer cultura.',
+   kaai:'🦜 Correcto si diferencias pasividad vs interpretación crítica.',
+   criteria:'distinción clara entre pasividad/consumo y lectura/interpretación crítica'},
+  {id:16,type:'a',sub:'up',pts:20,title:'Resignificación visible',
+   q:'Sube una foto donde haya resignificación.',extra:'Explica en 1 frase qué es lo que resignifica.',
+   kaai:'🦜 ¡Archivo recibido! Verificación del Profe requerida.'},
+  {id:17,type:'a',sub:'up',pts:20,title:'El código del meme',
+   q:'Sube un meme y explica qué código cultural necesita para entenderse.',extra:'¿Qué necesita saber quien lo lee?',
+   kaai:'🦜 Meme cargado. El Profe verificará el análisis.'},
+  {id:18,type:'a',sub:'up',pts:20,title:'Encierro algorítmico',
+   q:'Sube una evidencia de "encierro algorítmico".',extra:'¿Cómo lo identificaron?',
+   kaai:'🦜 Evidencia recibida. Verificación en curso.'},
+  {id:19,type:'a',sub:'up',pts:20,title:'Lo cotidiano como arte',
+   q:'Sube una imagen donde algo cotidiano pueda leerse como arte.',extra:'¿Qué mirada lo convierte en arte?',
+   kaai:'🦜 Imagen recibida. El Profe revisará la lectura.'},
+  {id:20,type:'a',sub:'up',pts:20,title:'Símbolo e identidad',
+   q:'Sube un símbolo y explica cómo produce identidad.',extra:'¿A qué comunidad convoca?',
+   kaai:'🦜 Símbolo cargado. Verificación del Profe requerida.'},
+  {id:21,type:'m',sub:'field',pts:25,title:'El poder invisible',
+   q:'Encuentren un espacio donde el poder no sea visible pero sí efectivo.',extra:'Expliquen cómo funciona ese poder sin verse.',
+   kaai:'🦜 Exploración verificada. El poder opera incluso cuando no se muestra.'},
+  {id:22,type:'m',sub:'field',pts:25,title:'El objeto ambiguo',
+   q:'Encuentren un objeto que cambie de significado según el contexto.',extra:'Justifiquen: ¿qué cambia y por qué?',
+   kaai:'🦜 Correcto. El significado no vive en el objeto, vive en el contexto.'},
+  {id:23,type:'m',sub:'field',pts:25,title:'Digital en lo físico',
+   q:'Encuentren una interacción donde se vea cultura digital en lo físico.',extra:'Expliquen cómo lo digital se materializa.',
+   kaai:'🦜 Buena observación. La pantalla y el cuerpo ya no son mundos separados.'},
+  {id:24,type:'m',sub:'field',pts:25,title:'Jerarquía naturalizada',
+   q:'Encuentren un ejemplo de jerarquía naturalizada.',extra:'Describan cómo se mantiene sin cuestionarse.',
+   kaai:'🦜 Exacto. Lo naturalizado es lo más difícil de ver porque parece inevitable.'},
+  {id:25,type:'m',sub:'field',pts:25,title:'El meme en la vida real',
+   q:'Encuentren algo que funcione como meme en la vida real.',extra:'Expliquen su lógica: repetición, variación, código compartido.',
+   kaai:'🦜 ¡Exploración completa! La vida también tiene sus memes.'},
+];
+
+// ─── STATE ────────────────────────────────────────
+let S = {team:'',members:'',score:0,done:[],cur:null,pollTimer:null};
+
+// ─── HELPERS ─────────────────────────────────────
+const show = id => { document.querySelectorAll('.scr').forEach(s=>s.classList.remove('on')); document.getElementById('scr-'+id).classList.add('on'); };
+const $  = id => document.getElementById(id);
+const badgeHTML = t => t==='k'?'<span class="badge bk">Conocimiento</span>':t==='a'?'<span class="badge ba">Carga</span>':'<span class="badge bm">Movimiento</span>';
+const statusIco = s => s==='done'?'✓':s==='open'?'▶':'🔒';
+
+async function api(path, method='GET', body=null){
+  const opts = {method, headers:{'Content-Type':'application/json'}};
+  if(body) opts.body = JSON.stringify(body);
+  const r = await fetch(BASE+'/api/'+path, opts);
+  return r.json();
+}
+
+async function syncScore(){
+  try{ await api('scores','POST',{team_name:S.team,members:S.members,score:S.score,completed:S.done.length}); }catch(e){}
+}
+
+// ─── START ────────────────────────────────────────
+async function startGame(){
+  const name = $('inp-team').value.trim();
+  const members = $('inp-members').value.trim();
+  if(!name){alert('Ingresa el nombre de tu cuadrilla');return;}
+  S.team=name; S.members=members;
+  $('hdr-team').textContent=name;
+  $('map-name').textContent=name;
+  await syncScore();
+  renderMap(); show('map');
+}
+
+function goMap(){ renderMap(); show('map'); }
+
+// ─── MAP ──────────────────────────────────────────
+function renderMap(){
+  $('map-score').textContent=S.score;
+  const done=S.done.length;
+  $('pb-txt').textContent=done+' / 25';
+  $('pb-fl').style.width=(done/25*100)+'%';
+  $('lvl-grid').innerHTML=RETOS.map((r,i)=>{
+    const isDone=S.done.includes(r.id);
+    const isOpen=isDone||(i===0||S.done.includes(RETOS[i-1].id));
+    const st=isDone?'done':isOpen?'open':'lock';
+    return `<div class="lvi ${st}" ${isOpen&&!isDone?`onclick="openCh(${r.id})"`:''}
+      ><div class="lvi-num">${String(r.id).padStart(2,'0')}</div>
+      <div class="lvi-info">${badgeHTML(r.type)}<div class="lvi-title">${r.title}</div></div>
+      <div class="lvi-pts">+${r.pts}pts</div>
+      <div class="lvi-ico">${statusIco(st)}</div></div>`;
+  }).join('');
+  if(S.done.length===25){ $('comp-pts').textContent=S.score; $('comp-team').textContent=S.team; setTimeout(()=>show('done'),600); }
+}
+
+// ─── CHALLENGE ────────────────────────────────────
+function openCh(id){
+  S.cur=RETOS.find(r=>r.id===id);
+  $('ch-body').innerHTML=buildCh(S.cur);
+  show('ch');
+}
+
+function buildCh(r){
+  const tc={k:'#5B8ACC',a:' var(--orange)',m:'var(--move)'};
+  const tl={k:'Reto de Conocimiento',a:'Reto de Carga',m:'Reto de Movimiento'};
+  let body='';
+  if(r.sub==='mc'){
+    body=`<div class="opts">${r.opts.map((o,i)=>`<button class="opt" id="opt${i}" onclick="pickOpt(${i},${r.ans})"><span class="opt-k">${'abcd'[i]})</span><span>${o}</span></button>`).join('')}</div>
+    <div class="kaai" id="kaai"></div>`;
+  } else if(r.sub==='open'){
+    body=`<div class="ch-hint">🤔 Responde con tus propias palabras. Kaai evaluará con IA.</div>
+    <textarea class="ta" id="ota" placeholder="Escribe tu respuesta aquí…"></textarea>
+    <button class="btn-s" id="btn-open" onclick="submitOpen(${r.id})">⟶ ENVIAR RESPUESTA</button>
+    <div class="ald" id="ald"><div class="ald-t">Kaai evaluando respuesta…</div></div>
+    <div class="kaai" id="kaai"></div>`;
+  } else if(r.sub==='up'){
+    body=`<div class="ch-hint">📸 Sube imagen + explicación. El Profe verificará.</div>
+    <div class="upz" onclick="document.getElementById('fi').click()"><input type="file" id="fi" accept="image/*" onchange="handleFile(event)"><div class="upz-icon">↑</div><div class="upz-lbl">Toca para subir imagen<br><span style="color:var(--tdim);font-size:9px">${r.extra}</span></div></div>
+    <div id="prev-w" style="display:none"><img id="img-prev" class="img-prev"></div>
+    <input class="cap" id="cap" placeholder="${r.extra}" style="display:none">
+    <button class="btn-v" id="btn-up" style="display:none" onclick="submitUp(${r.id})">🔔 SOLICITAR VERIFICACIÓN AL PROFE</button>
+    <div class="vpend" id="vpend"><h3>⏳ Esperando verificación</h3><div class="vcode" id="vcode">----</div><p>Muestra este código al Profe.</p></div>
+    <div class="kaai" id="kaai"></div>`;
+  } else if(r.sub==='field'){
+    body=`<div class="mvbox"><div class="mvbox-lbl">🚶 Misión de campo — Salgan si es necesario</div><div class="mvbox-task">${r.q}<br><br><strong>${r.extra}</strong></div></div>
+    <textarea class="ta mv" id="fta" placeholder="Describan lo que encontraron y su análisis…"></textarea>
+    <button class="btn-v" id="btn-field" onclick="submitField(${r.id})">🔔 SOLICITAR VERIFICACIÓN AL PROFE</button>
+    <div class="vpend" id="vpend"><h3>⏳ Esperando verificación</h3><div class="vcode" id="vcode">----</div><p>Muestra este código al Profe.</p></div>
+    <div class="kaai" id="kaai"></div>`;
+  }
+  return `<div class="ch-num" style="color:${tc[r.type]}">RETO ${String(r.id).padStart(2,'0')} · ${tl[r.type].toUpperCase()} · +${r.pts} PTS</div>
+  <div class="ch-q">${r.q}</div>${body}`;
+}
+
+// ─── MULTIPLE CHOICE ──────────────────────────────
+function pickOpt(idx,correct){
+  const r=S.cur;
+  document.querySelectorAll('.opt').forEach(b=>b.disabled=true);
+  const fb=$('kaai');
+  if(idx===correct){
+    document.getElementById('opt'+idx).classList.add('cor');
+    fb.className='kaai on';
+    fb.innerHTML=`<div class="kaai-top"><div class="kaai-ico">🦜</div><div class="kaai-name">Kaai — Respuesta correcta</div></div><div class="kaai-msg">${r.kaai}</div><div class="kaai-pts">+${r.pts} pts</div>`;
+    setTimeout(()=>completeReto(r.id,r.pts),2200);
+  } else {
+    document.getElementById('opt'+idx).classList.add('wrg');
+    document.getElementById('opt'+correct).classList.add('cor');
+    fb.className='kaai err on';
+    fb.innerHTML=`<div class="kaai-top"><div class="kaai-ico">🦜</div><div class="kaai-name">Kaai — Intenta de nuevo</div></div><div class="kaai-msg">Esa no es la respuesta. Piensen en el contexto cultural más amplio…</div>`;
+    setTimeout(()=>{
+      document.getElementById('opt'+idx).classList.remove('wrg');
+      document.getElementById('opt'+correct).classList.remove('cor');
+      document.querySelectorAll('.opt').forEach(b=>b.disabled=false);
+      fb.className='kaai';
+    },2000);
+  }
+}
+
+// ─── OPEN ANSWER ──────────────────────────────────
+async function submitOpen(id){
+  const r=RETOS.find(x=>x.id===id);
+  const answer=$('ota').value.trim();
+  if(!answer||answer.length<15){alert('Escribe una respuesta más completa.');return;}
+  $('btn-open').disabled=true; $('ald').classList.add('on');
+  try{
+    const res=await api('evaluate','POST',{question:r.q,criteria:r.criteria,answer});
+    $('ald').classList.remove('on');
+    const fb=$('kaai');
+    if(res.correct){
+      fb.className='kaai on';
+      fb.innerHTML=`<div class="kaai-top"><div class="kaai-ico">🦜</div><div class="kaai-name">Kaai — Respuesta aceptada</div></div><div class="kaai-msg">${res.feedback}</div><div class="kaai-pts">+${r.pts} pts</div>`;
+      setTimeout(()=>completeReto(r.id,r.pts),2500);
+    } else {
+      fb.className='kaai err on';
+      fb.innerHTML=`<div class="kaai-top"><div class="kaai-ico">🦜</div><div class="kaai-name">Kaai — Sigue explorando</div></div><div class="kaai-msg">${res.feedback}</div>`;
+      $('btn-open').disabled=false;
+    }
+  }catch(e){
+    $('ald').classList.remove('on');
+    $('btn-open').disabled=false;
+    requestVerify(id);
+  }
+}
+
+// ─── UPLOAD ───────────────────────────────────────
+function handleFile(e){
+  const f=e.target.files[0]; if(!f) return;
+  const reader=new FileReader();
+  reader.onload=ev=>{
+    $('img-prev').src=ev.target.result;
+    $('prev-w').style.display='block';
+    $('cap').style.display='block';
+    $('btn-up').style.display='block';
+    document.querySelector('.upz').style.opacity='.45';
+  };
+  reader.readAsDataURL(f);
+}
+function submitUp(id){
+  if(!$('cap').value.trim()){alert('Agrega tu explicación.');return;}
+  $('btn-up').disabled=true; requestVerify(id);
+}
+
+// ─── FIELD ────────────────────────────────────────
+function submitField(id){
+  if($('fta').value.trim().length<20){alert('Describe con más detalle.');return;}
+  $('btn-field').disabled=true; requestVerify(id);
+}
+
+// ─── VERIFY SYSTEM ────────────────────────────────
+async function requestVerify(id){
+  try{
+    const r=RETOS.find(x=>x.id===id);
+    const res=await api('verify','POST',{action:'create',team_name:S.team,reto_id:id,reto_title:r.title});
+    const code=res.code;
+    $('vcode').textContent=code;
+    $('vpend').classList.add('on');
+    // Poll for resolution
+    if(S.pollTimer) clearInterval(S.pollTimer);
+    S.pollTimer=setInterval(async()=>{
+      try{
+        const check=await api('verify?code='+code);
+        if(check.status==='approve'){
+          clearInterval(S.pollTimer);
+          const reto=RETOS.find(x=>x.id===id);
+          $('vpend').classList.remove('on');
+          const fb=$('kaai');
+          fb.className='kaai on';
+          fb.innerHTML=`<div class="kaai-top"><div class="kaai-ico">🦜</div><div class="kaai-name">Kaai — Reto aprobado por el Profe</div></div><div class="kaai-msg">${reto.kaai.replace('🦜 ','')}</div><div class="kaai-pts">+${reto.pts} pts</div>`;
+          setTimeout(()=>completeReto(reto.id,reto.pts),2200);
+        } else if(check.status==='reject'){
+          clearInterval(S.pollTimer);
+          $('vpend').classList.remove('on');
+          const fb=$('kaai');
+          fb.className='kaai err on';
+          fb.innerHTML=`<div class="kaai-top"><div class="kaai-ico">🦜</div><div class="kaai-name">Kaai — Intenta de nuevo</div></div><div class="kaai-msg">El Profe indicó que el reto necesita más desarrollo. Revisen y vuelvan a intentarlo.</div>`;
+          // Re-enable submit buttons
+          ['btn-up','btn-field','btn-open'].forEach(b=>{const el=$(b);if(el)el.disabled=false;});
+        }
+      }catch(e){}
+    },2500);
+  }catch(e){ alert('Error de conexión. Verifica tu internet.'); }
+}
+
+// ─── PROFE PANEL ──────────────────────────────────
+function showProfe(){ $('pmodal').classList.add('on'); }
+function hideProfe(){ $('pmodal').classList.remove('on'); $('profe-code').value=''; }
+async function profeAct(action){
+  const code=$('profe-code').value.trim().toUpperCase();
+  if(!code){alert('Ingresa el código');return;}
+  try{
+    const res=await api('verify','POST',{action,code});
+    const el=$('pm-res');
+    el.classList.add('on');
+    if(res.code||res.status===action){
+      el.style.background=action==='approve'?'#0A1F0E':'#1F0A0A';
+      el.style.color=action==='approve'?'var(--move)':'var(--red)';
+      el.textContent=action==='approve'?'✓ Aprobado — puntos acreditados.':'✗ Rechazado — el equipo reintentará.';
+    } else {
+      el.style.background='#1F0A0A'; el.style.color='#E07070';
+      el.textContent=res.error||'Código no encontrado.';
+    }
+    $('profe-code').value='';
+    setTimeout(()=>{el.classList.remove('on');hideProfe();},2200);
+  }catch(e){alert('Error de conexión.');}
+}
+
+// ─── COMPLETE ─────────────────────────────────────
+async function completeReto(id,pts){
+  if(S.done.includes(id)) return;
+  S.done.push(id); S.score+=pts;
+  await syncScore();
+  const r=RETOS.find(x=>x.id===id);
+  showBanner(r.title,pts);
+  confetti();
+  setTimeout(goMap,2800);
+}
+
+function showBanner(title,pts){
+  $('lvb-t').textContent=title; $('lvb-p').textContent='+'+pts+' pts';
+  $('lvbanner').classList.add('on');
+  setTimeout(()=>$('lvbanner').classList.remove('on'),2600);
+}
+
+function confetti(){
+  const c=$('conf'); c.innerHTML=''; c.classList.add('on');
+  const cols=['#7CB342','#BFA46A','#E07B2A','#2ECC71','#DDD8C4'];
+  for(let i=0;i<28;i++){
+    const p=document.createElement('div'); p.className='cp';
+    const tx=(Math.random()-.5)*500, ty=(Math.random()-1)*500;
+    p.style.cssText=`left:${Math.random()*100}%;top:50%;background:${cols[~~(Math.random()*5)]};--tx:${tx}px;--ty:${ty}px;animation-delay:${Math.random()*.3}s`;
+    c.appendChild(p);
+  }
+  setTimeout(()=>{c.classList.remove('on');c.innerHTML=''},1600);
+}
+</script>
+</body>
+</html>
