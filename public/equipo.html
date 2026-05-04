@@ -479,12 +479,10 @@ function pickOpt(idx,correct){
     setTimeout(()=>completeReto(r.id,r.pts),2200);
   } else {
     document.getElementById('opt'+idx).classList.add('wrg');
-    document.getElementById('opt'+correct).classList.add('cor');
     fb.className='kaai err on';
     fb.innerHTML=`<div class="kaai-top"><div class="kaai-ico">🦜</div><div class="kaai-name">Kaai — Intenta de nuevo</div></div><div class="kaai-msg">Esa no es la respuesta. Piensen en el contexto cultural más amplio…</div>`;
     setTimeout(()=>{
       document.getElementById('opt'+idx).classList.remove('wrg');
-      document.getElementById('opt'+correct).classList.remove('cor');
       document.querySelectorAll('.opt').forEach(b=>b.disabled=false);
       fb.className='kaai';
     },2000);
