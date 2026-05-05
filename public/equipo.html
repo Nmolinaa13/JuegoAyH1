@@ -376,7 +376,20 @@ const RETOS = [
 ];
 
 // ─── STATE ────────────────────────────────────────
-let S = {team:'',members:'',score:0,done:[],cur:null,pollTimer:null};
+function loadState(){
+  try{
+    const saved = localStorage.getItem('ac_state');
+    if(saved) return JSON.parse(saved);
+  }catch(e){}
+  return {team:'',members:'',score:0,done:[],cur:null,pollTimer:null};
+}
+let S = loadState();
+
+function saveState(){
+  try{
+    localStorage.setItem('ac_state', JSON.stringify({team:S.team,members:S.members,score:S.score,done:S.done,cur:null,pollTimer:null}));
+  }catch(e){}
+}
 
 // ─── HELPERS ─────────────────────────────────────
 const show = id => { document.querySelectorAll('.scr').forEach(s=>s.classList.remove('on')); document.getElementById('scr-'+id).classList.add('on'); };
@@ -401,6 +414,7 @@ async function startGame(){
   const members = $('inp-members').value.trim();
   if(!name){alert('Ingresa el nombre de tu cuadrilla');return;}
   S.team=name; S.members=members;
+  saveState();
   $('hdr-team').textContent=name;
   $('map-name').textContent=name;
   await syncScore();
@@ -610,6 +624,7 @@ async function profeAct(action){
 async function completeReto(id,pts){
   if(S.done.includes(id)) return;
   S.done.push(id); S.score+=pts;
+  saveState();
   await syncScore();
   const r=RETOS.find(x=>x.id===id);
   showBanner(r.title,pts);
@@ -633,6 +648,11 @@ function confetti(){
     c.appendChild(p);
   }
   setTimeout(()=>{c.classList.remove('on');c.innerHTML=''},1600);
+}
+  if(S.team){
+  $('hdr-r').textContent=S.team;
+  $('map-name').textContent=S.team;
+  renderMap(); show('map');
 }
 </script>
 </body>
