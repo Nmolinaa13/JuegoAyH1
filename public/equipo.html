@@ -566,12 +566,17 @@ async function requestVerify(id){
           setTimeout(()=>completeReto(reto.id,reto.pts),2200);
         } else if(check.status==='reject'){
           clearInterval(S.pollTimer);
+          S.pollTimer=null;
           $('vpend').classList.remove('on');
           const fb=$('kaai');
           fb.className='kaai err on';
           fb.innerHTML=`<div class="kaai-top"><div class="kaai-ico">🦜</div><div class="kaai-name">Kaai — Intenta de nuevo</div></div><div class="kaai-msg">El Profe indicó que el reto necesita más desarrollo. Revisen y vuelvan a intentarlo.</div>`;
-          // Re-enable submit buttons
-          ['btn-up','btn-field','btn-open'].forEach(b=>{const el=$(b);if(el)el.disabled=false;});
+          ['btn-up','btn-field','btn-open'].forEach(b=>{
+            const el=$(b);
+            if(el){ el.disabled=false; el.style.display='block'; }
+          });
+          const upz=document.querySelector('.upz');
+          if(upz) upz.style.opacity='1';
         }
       }catch(e){}
     },2500);
